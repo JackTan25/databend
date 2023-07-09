@@ -15,6 +15,7 @@ inputs:
     default: ""
 runs:
   using: "composite"
+  runs-on: ubuntu-latest
   steps:
     - name: Download artifact
       uses: ./.github/actions/artifact_download
