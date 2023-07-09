@@ -45,6 +45,7 @@ use common_storage::StageFileInfo;
 use dashmap::DashMap;
 use opendal::Operator;
 use parking_lot::Mutex;
+use tracing::error;
 
 use crate::parquet_file::append_data_to_parquet_files;
 use crate::row_based_file::append_data_to_row_based_files;
@@ -172,7 +173,16 @@ impl Table for StageTable {
                 splits.push(Arc::new(split.clone()));
             }
         }
-
+        let mut file_names = String::from("");
+        for file in &splits {
+            file_names.push_str(&file.file.path);
+            file_names.push_str(",");
+        }
+        error!(
+            "read files at node id {}: {}",
+            ctx.get_cluster().local_id,
+            file_names
+        );
         //  Build copy pipeline.
         let settings = ctx.get_settings();
         let fields = stage_table_info
@@ -206,7 +216,7 @@ impl Table for StageTable {
             self.table_info.is_select,
             projection,
         )?);
-        tracing::debug!("start copy splits feeder in {}", ctx.get_cluster().local_id);
+        tracing::info!("start copy splits feeder in {}", ctx.get_cluster().local_id);
         input_ctx.format.exec_copy(input_ctx.clone(), pipeline)?;
         Ok(())
     }

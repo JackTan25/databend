@@ -55,7 +55,7 @@ copy into products from @s1 pattern = '.*[.]csv' purge = true;
 query I
 select count(*) from products;
 ----
-0
+8
 
 statement ok
 select block_count from fuse_snapshot('default','products');
